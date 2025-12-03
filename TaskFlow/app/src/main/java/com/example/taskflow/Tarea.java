@@ -17,6 +17,7 @@ public class Tarea implements Serializable {
     private String amPmFin;
 
     // --- CONSTRUCTOR 1: EL COMPLETO (13 datos) ---
+    // Este lo usa la pantalla de "Crear/Editar" para guardar todo al detalle
     public Tarea(String titulo, String fechaHora, String descripcion, String ubicacion,
                  int dia, int mes, int anio,
                  int horaInicio, int minInicio, String amPmInicio,
@@ -32,17 +33,17 @@ public class Tarea implements Serializable {
         this.horaFin = horaFin; this.minFin = minFin; this.amPmFin = amPmFin;
     }
 
-    // --- CONSTRUCTOR 2: INTERMEDIO (4 datos) ---
+    // --- CONSTRUCTOR 2: EL QUE TE FALTABA (4 datos) ---
+    // Este arregla tu error en MainActivity. Permite crear tareas con descripción pero sin hora exacta.
     public Tarea(String titulo, String fechaHora, String descripcion, String ubicacion) {
-        // Llama al constructor completo con ceros en los datos numéricos
+        // Llama al completo poniendo ceros en los datos numéricos que no tenemos
         this(titulo, fechaHora, descripcion, ubicacion, 0, 0, 0, 0, 0, "", 0, 0, "");
     }
 
-    // --- CONSTRUCTOR 3: EL SIMPLE (2 datos) --- ¡ESTE ES EL QUE TE FALTABA!
-    // Esto arregla tu error en MainActivity
+    // --- CONSTRUCTOR 3: EL SIMPLE (2 datos) ---
+    // Por si en algún sitio solo pasas título y fecha
     public Tarea(String titulo, String fechaHora) {
-        // Llama al constructor intermedio poniendo descripción y ubicación vacías
-        this(titulo, fechaHora, "", "");
+        this(titulo, fechaHora, "", "", 0, 0, 0, 0, 0, "", 0, 0, "");
     }
 
     // --- GETTERS Y SETTERS ---
