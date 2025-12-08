@@ -5,17 +5,17 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+//import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageView;
+//import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+//import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -31,6 +31,7 @@ public class CalendarioActivity extends AppCompatActivity {
     // Variables Fecha
     private Calendar fechaSeleccionadaCalendar;
     private TextView tvMesAnioSelector, tvFechaSeleccionadaBig;
+    private CalendarioAdapter.OnItemClickListener listenerAcciones;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,22 +52,23 @@ public class CalendarioActivity extends AppCompatActivity {
         // 2. Inicializar Lista y Adaptador
         listaTareasVisual = new ArrayList<>();
 
-        adapter = new CalendarioAdapter(listaTareasVisual, new CalendarioAdapter.OnItemClickListener() {
+        listenerAcciones = new CalendarioAdapter.OnItemClickListener() {
             @Override
             public void onEditClick(Tarea tarea) {
-                // Abrir editar
                 Intent intent = new Intent(CalendarioActivity.this, CrearTareaActivity.class);
                 intent.putExtra("TAREA_A_EDITAR", tarea);
-                // Pasamos -1 o 0 porque ahora gestionamos por objeto en el repositorio
-                intent.putExtra("POSICION_ORIGINAL", 0);
+
+                // Busca el índice real en la lista global
+                int indiceReal = Repositorio.tareasGlobales.indexOf(tarea);
+                intent.putExtra("POSICION_ORIGINAL", indiceReal);
+
                 startActivity(intent);
             }
 
             @Override
             public void onDeleteClick(Tarea tarea) {
-                // Borrar del repositorio GLOBAL
                 Repositorio.tareasGlobales.remove(tarea);
-                cargarTareasDelDia(); // Refrescar pantalla
+                cargarTareasDelDia();
                 Toast.makeText(CalendarioActivity.this, "Tarea eliminada", Toast.LENGTH_SHORT).show();
             }
 
@@ -87,7 +89,8 @@ public class CalendarioActivity extends AppCompatActivity {
                 cargarTareasDelDia();
                 Toast.makeText(CalendarioActivity.this, "Tarea duplicada", Toast.LENGTH_SHORT).show();
             }
-        });
+        };
+        adapter = new CalendarioAdapter(listaTareasVisual, listenerAcciones);
         rvCalendario.setAdapter(adapter);
 
         // 3. Cargar datos iniciales
@@ -96,9 +99,7 @@ public class CalendarioActivity extends AppCompatActivity {
         // 4. Listeners
         btnSelectorFecha.setOnClickListener(v -> mostrarSelectorFecha());
 
-        findViewById(R.id.fabAddCal).setOnClickListener(v -> {
-            startActivity(new Intent(CalendarioActivity.this, CrearTareaActivity.class));
-        });
+        findViewById(R.id.fabAddCal).setOnClickListener(v -> startActivity(new Intent(CalendarioActivity.this, CrearTareaActivity.class)));
 
         setupToolbarButtons();
     }
@@ -125,6 +126,12 @@ public class CalendarioActivity extends AppCompatActivity {
                 listaTareasVisual.add(t);
             }
         }
+
+        // Vuelve a configurar el adaptador con la nueva lista
+        if (rvCalendario.getAdapter() != adapter) {
+            rvCalendario.setAdapter(adapter);
+        }
+
         adapter.notifyDataSetChanged();
     }
 
@@ -143,7 +150,12 @@ public class CalendarioActivity extends AppCompatActivity {
     private void actualizarTextosFecha() {
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", new Locale("es", "ES"));
         String t = sdf.format(fechaSeleccionadaCalendar.getTime());
-        tvMesAnioSelector.setText(t.substring(0, 1).toUpperCase() + t.substring(1));
+
+        if (!t.isEmpty()) {
+            tvMesAnioSelector.setText(t.substring(0, 1).toUpperCase() + t.substring(1));
+        } else {
+            tvMesAnioSelector.setText(t);
+        }
 
         SimpleDateFormat sdf2 = new SimpleDateFormat("dd MMMM yyyy", new Locale("es", "ES"));
         tvFechaSeleccionadaBig.setText(sdf2.format(fechaSeleccionadaCalendar.getTime()).toUpperCase());
@@ -159,7 +171,7 @@ public class CalendarioActivity extends AppCompatActivity {
             fechaSeleccionadaCalendar = Calendar.getInstance();
             actualizarTextosFecha();
             cargarTareasDelDia();
-            Toast.makeText(this, "Vuelto a Hoy", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Has vuelto al día actual", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -194,16 +206,16 @@ public class CalendarioActivity extends AppCompatActivity {
         }
 
         if (listaFiltrada.isEmpty()) {
-            Toast.makeText(this, "No encontrado en este día", Toast.LENGTH_SHORT).show();
-        } else {
-            // Creamos un adaptador temporal solo para mostrar la búsqueda
-            // (Nota: al volver a onResume o cambiar fecha se resetea)
-            CalendarioAdapter adapterFiltro = new CalendarioAdapter(listaFiltrada, new CalendarioAdapter.OnItemClickListener() {
-                @Override public void onEditClick(Tarea t) { startActivity(new Intent(CalendarioActivity.this, CrearTareaActivity.class).putExtra("TAREA_A_EDITAR", t)); }
-                @Override public void onDeleteClick(Tarea t) { Repositorio.tareasGlobales.remove(t); cargarTareasDelDia(); }
-                @Override public void onDuplicateClick(Tarea t) { Repositorio.tareasGlobales.add(t); cargarTareasDelDia(); }
-            });
+            Toast.makeText(this, "No se ha encontrado en este día.", Toast.LENGTH_SHORT).show();
+        } else {CalendarioAdapter adapterFiltro = new CalendarioAdapter(listaFiltrada, listenerAcciones);
             rvCalendario.setAdapter(adapterFiltro);
+
+            // Mejora el Scrolll
+            Tarea primerResultado = listaFiltrada.get(0);
+            int horaInicio24 = primerResultado.getHoraInicio24(); // Usa el método de Tarea
+
+            // Hace un scroll suave hasta la hora
+            rvCalendario.scrollToPosition(horaInicio24);
         }
     }
 }

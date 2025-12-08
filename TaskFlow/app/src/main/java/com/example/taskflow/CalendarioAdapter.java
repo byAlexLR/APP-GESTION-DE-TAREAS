@@ -1,28 +1,28 @@
 package com.example.taskflow;
 
+import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
+import java.util.Objects;
 
 public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.HoraViewHolder> {
 
-    private List<Tarea> listaTareasDelDia;
-    private OnItemClickListener listener;
+    private final List<Tarea> listaTareasDelDia;
+    private final OnItemClickListener listener;
 
     // Interfaz para comunicar acciones a la Activity
     public interface OnItemClickListener {
-        void onEditClick(Tarea tarea); // Pasamos la tarea directamente
+        void onEditClick(Tarea tarea);
         void onDeleteClick(Tarea tarea);
         void onDuplicateClick(Tarea tarea);
     }
@@ -42,14 +42,24 @@ public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.Ho
     @Override
     public void onBindViewHolder(@NonNull HoraViewHolder holder, int position) {
         // 1. Formatear hora
-        String horaTexto = formatearHora(position);
-        holder.tvHora.setText(horaTexto);
+        holder.tvHora.setText(formatearHora(position));
 
         // 2. Buscar si hay tarea en esta hora
         Tarea tareaEncontrada = null;
+        boolean esHoraInicio = false;
+        boolean esUltimaHora = false;
+
         for (Tarea t : listaTareasDelDia) {
-            if (t.getHoraInicio() == position) {
+            // Métodos de conversión de Tarea
+            int horaInicio24 = t.getHoraInicio24();
+            int horaFin24 = t.getHoraFin24();
+
+            if (horaFin24 < horaInicio24) horaFin24 = 24;
+
+            if (position >= horaInicio24 && position < horaFin24) {
                 tareaEncontrada = t;
+                esHoraInicio = (position == horaInicio24);
+                esUltimaHora = (position == horaFin24 - 1);
                 break;
             }
         }
@@ -58,72 +68,127 @@ public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.Ho
         if (tareaEncontrada != null) {
             holder.cardTarea.setVisibility(View.VISIBLE);
 
-            // Rellenar datos
-            holder.tvTitulo.setText(tareaEncontrada.getTitulo());
-            holder.tvDesc.setText(tareaEncontrada.getDescripcion());
-            holder.tvUbi.setText(tareaEncontrada.getUbicacion());
+            // Obtenemos los LayoutParams para modificar márgenes dinámicamente
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) holder.cardTarea.getLayoutParams();
+            final Tarea finalTarea = tareaEncontrada;
 
-            // Controlar Expansión
-            boolean isExpanded = tareaEncontrada.isExpanded();
-            holder.layoutDetalles.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+            if (esHoraInicio) {
+                holder.layoutContenidoPrincipal.setVisibility(View.VISIBLE);
 
-            if (isExpanded) {
-                holder.imgArrow.setImageResource(R.drawable.ic_arrow_up);
+                // Márgenes
+                params.topMargin = 4;
+                params.bottomMargin = 0;
+
+                // Estética
+                holder.cardTarea.setRadius(16);
+                holder.cardTarea.setCardElevation(0);
+
+                // Ocultamos línea de fondo para fusionar con la siguiente
+                holder.lineaSeparadora.setVisibility(View.GONE);
+
+                // Datos
+                holder.tvTitulo.setText(finalTarea.getTitulo());
+                holder.tvUbi.setText(finalTarea.getUbicacion());
+                holder.tvDesc.setText(generarTextoDescripcion(finalTarea));
+
+                // Configurar lógica de botones y click
+                configurarBotonesYExpansion(holder, finalTarea);
+
             } else {
-                holder.imgArrow.setImageResource(R.drawable.ic_arrow_down);
-            }
+                holder.layoutContenidoPrincipal.setVisibility(View.GONE);
+                holder.layoutDetalles.setVisibility(View.GONE);
 
-            // Click en tarjeta (Expansión)
-            Tarea finalTarea = tareaEncontrada;
-            holder.cardTarea.setOnClickListener(v -> {
-                finalTarea.setExpanded(!finalTarea.isExpanded());
-                notifyItemChanged(position);
-            });
+                // Limpiamos listeners antiguos
+                holder.cardTarea.setOnClickListener(null);
 
-            // === BOTÓN EDITAR ===
-            holder.btnEditar.setOnClickListener(v -> {
-                if (listener != null) listener.onEditClick(finalTarea);
-            });
+                // Márgenes
+                params.topMargin = 0;
+                holder.cardTarea.setCardElevation(0);
 
-            // === BOTÓN COMPARTIR (Gmail/WhatsApp) ===
-            holder.btnCompartir.setOnClickListener(v -> {
-                String asunto = "Tarea: " + finalTarea.getTitulo();
-                String mensaje = "📅 *Fecha:* " + finalTarea.getFechaHora() + "\n" +
-                        "📝 *Nota:* " + finalTarea.getDescripcion() + "\n" +
-                        "📍 *Lugar:* " + finalTarea.getUbicacion();
-
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_SUBJECT, asunto);
-                intent.putExtra(Intent.EXTRA_TEXT, mensaje);
-                v.getContext().startActivity(Intent.createChooser(intent, "Compartir tarea..."));
-            });
-
-            // === BOTÓN MENÚ (Borrar/Duplicar) ===
-            holder.btnMenu.setOnClickListener(v -> {
-                PopupMenu popup = new PopupMenu(v.getContext(), holder.btnMenu);
-                popup.getMenu().add("Duplicar");
-                popup.getMenu().add("Eliminar");
-
-                popup.setOnMenuItemClickListener(item -> {
-                    if (listener == null) return false;
-                    if (item.getTitle().equals("Duplicar")) {
-                        listener.onDuplicateClick(finalTarea);
-                        return true;
-                    } else if (item.getTitle().equals("Eliminar")) {
-                        listener.onDeleteClick(finalTarea);
-                        return true;
-                    }
-                    return false;
+                // Hacemos que esta parte "vacía" funcione igual que la principal
+                holder.cardTarea.setOnClickListener(v -> {
+                    finalTarea.setExpanded(!finalTarea.isExpanded());
+                    notifyDataSetChanged();
                 });
-                popup.show();
-            });
 
+                if (esUltimaHora) {
+                    params.bottomMargin = 4;
+                    holder.cardTarea.setRadius(16);
+                    holder.lineaSeparadora.setVisibility(View.VISIBLE);
+                } else {
+                    params.bottomMargin = 0;
+                    holder.cardTarea.setRadius(0);
+                    holder.lineaSeparadora.setVisibility(View.GONE);
+                }
+            }
+            holder.cardTarea.setCardBackgroundColor(android.graphics.Color.WHITE);
+            holder.cardTarea.setLayoutParams(params);
         } else {
             // Hora vacía
             holder.cardTarea.setVisibility(View.INVISIBLE);
             holder.cardTarea.setOnClickListener(null);
+            holder.lineaSeparadora.setVisibility(View.VISIBLE);
         }
+    }
+
+    // Genera el texto de descripción con formato adecuado
+    private String generarTextoDescripcion(Tarea tarea) {
+        String minIn = tarea.getMinInicio() < 10 ? "0" + tarea.getMinInicio() : String.valueOf(tarea.getMinInicio());
+        String minOut = tarea.getMinFin() < 10 ? "0" + tarea.getMinFin() : String.valueOf(tarea.getMinFin());
+        String rangoHoras = tarea.getHoraInicio() + ":" + minIn + " " + tarea.getAmPmInicio() +
+                " - " +
+                tarea.getHoraFin() + ":" + minOut + " " + tarea.getAmPmFin();
+
+        if (tarea.getDescripcion() != null && !tarea.getDescripcion().isEmpty()) {
+            return rangoHoras + "\n\n" + tarea.getDescripcion();
+        }
+        return rangoHoras;
+    }
+
+    private void configurarBotonesYExpansion(HoraViewHolder holder, Tarea tarea) {
+        // Controlar Expansión
+        boolean isExpanded = tarea.isExpanded();
+        holder.layoutDetalles.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+        holder.imgArrow.setImageResource(isExpanded ? R.drawable.ic_arrow_up : R.drawable.ic_arrow_down);
+
+        // Click en tarjeta (Expansión)
+        holder.cardTarea.setOnClickListener(v -> {
+            tarea.setExpanded(!tarea.isExpanded());
+            notifyDataSetChanged();
+        });
+
+        // Botones
+        holder.btnEditar.setOnClickListener(v -> { if (listener != null) listener.onEditClick(tarea); });
+        holder.btnCompartir.setOnClickListener(v -> compartirTarea(v.getContext(), tarea));
+        holder.btnMenu.setOnClickListener(v -> mostrarMenuOpciones(v, tarea));
+    }
+
+    // Para no repetir código y compatir la tarea
+    private void compartirTarea(Context context, Tarea tarea) {
+        String asunto = "Tarea: " + tarea.getTitulo();
+        String mensaje = "📅 Fecha: " + tarea.getFechaHora() + "\n" +
+                "📝 Nota: " + tarea.getDescripcion() + "\n" +
+                "📍 Lugar: " + tarea.getUbicacion();
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_SUBJECT, asunto);
+        intent.putExtra(Intent.EXTRA_TEXT, mensaje);
+        context.startActivity(Intent.createChooser(intent, "Compartir tarea..."));
+    }
+
+    // Menú de opciones
+    private void mostrarMenuOpciones(View v, Tarea tarea) {
+        PopupMenu popup = new PopupMenu(v.getContext(), v);
+        popup.getMenu().add("Duplicar");
+        popup.getMenu().add("Eliminar");
+        popup.setOnMenuItemClickListener(item -> {
+            if (listener == null) return false;
+            if (Objects.equals(item.getTitle(), "Duplicar")) { listener.onDuplicateClick(tarea); return true; }
+            else if (Objects.equals(item.getTitle(), "Eliminar")) { listener.onDeleteClick(tarea); return true; }
+            return false;
+        });
+        popup.show();
     }
 
     @Override
@@ -140,7 +205,8 @@ public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.Ho
         TextView tvHora, tvTitulo, tvDesc, tvUbi;
         CardView cardTarea;
         ImageView imgArrow, btnEditar, btnCompartir, btnMenu;
-        LinearLayout layoutDetalles;
+        LinearLayout layoutDetalles, layoutContenidoPrincipal;
+        View lineaSeparadora;
 
         public HoraViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -151,6 +217,8 @@ public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.Ho
             cardTarea = itemView.findViewById(R.id.cardTareaSlot);
             imgArrow = itemView.findViewById(R.id.imgArrowSlot);
             layoutDetalles = itemView.findViewById(R.id.layoutDetallesSlot);
+            layoutContenidoPrincipal = itemView.findViewById(R.id.layoutContenedorInfo);
+            lineaSeparadora = itemView.findViewById(R.id.lineaSeparadoraFondo);
 
             // Botones del slot
             btnEditar = itemView.findViewById(R.id.btnEditarSlot);

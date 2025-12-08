@@ -2,23 +2,24 @@ package com.example.taskflow;
 
 import android.content.Intent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
+//import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
+//import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
+//import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
+import java.util.Objects;
 
 public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHolder> {
 
-    private List<Tarea> listaTareas;
-    private OnItemClickListener listener;
+    private final List<Tarea> listaTareas;
+    private final OnItemClickListener listener;
 
     // === INTERFAZ CORRECTA (Usa objetos Tarea para evitar errores de índice) ===
     public interface OnItemClickListener {
@@ -63,11 +64,17 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
 
         // Listener para expandir/contraer al tocar la tarjeta
         View.OnClickListener expandListener = v -> {
+            // 1. Cambiamos el estado del dato
             tarea.setExpanded(!tarea.isExpanded());
-            notifyItemChanged(holder.getAdapterPosition());
+
+            // 2. IMPORTANTE: Notificamos al adaptador que esta posición cambió
+            // Esto fuerza a que se vuelva a ejecutar onBindViewHolder para esta fila
+            notifyItemChanged(holder.getBindingAdapterPosition());
         };
+
         holder.itemView.setOnClickListener(expandListener);
         holder.cardArrow.setOnClickListener(expandListener);
+
 
         // 3. BOTÓN EDITAR
         holder.btnEditar.setOnClickListener(v -> {
@@ -99,10 +106,10 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
             popup.setOnMenuItemClickListener(item -> {
                 if (listener == null) return false;
 
-                if (item.getTitle().equals("Duplicar")) {
+                if (Objects.equals(item.getTitle(), "Duplicar")) {
                     listener.onDuplicateClick(tarea);
                     return true;
-                } else if (item.getTitle().equals("Eliminar")) {
+                } else if (Objects.equals(item.getTitle(), "Eliminar")) {
                     listener.onDeleteClick(tarea);
                     return true;
                 }

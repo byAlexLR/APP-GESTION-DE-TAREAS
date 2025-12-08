@@ -3,22 +3,25 @@ package com.example.taskflow;
 import java.io.Serializable;
 
 public class Tarea implements Serializable {
-    private String titulo;
-    private String fechaHora;
-    private String descripcion;
-    private String ubicacion;
+    private final String titulo;
+    private final String fechaHora;
+    private final String descripcion;
+    private final String ubicacion;
     private boolean expanded;
 
     // Datos numéricos fecha
-    private int dia, mes, anio;
-    private int horaInicio, minInicio;
-    private String amPmInicio;
-    private int horaFin, minFin;
-    private String amPmFin;
+    private final int dia;
+    private final int mes;
+    private final int anio;
+    private final int horaInicio;
+    private final int minInicio;
+    private final String amPmInicio;
+    private final int horaFin, minFin;
+    private final String amPmFin;
 
     // --- NUEVO: Datos de notificación ---
-    private String notifCantidad;
-    private String notifUnidad;
+    private final String notifCantidad;
+    private final String notifUnidad;
 
     // --- CONSTRUCTOR COMPLETO (15 DATOS) ---
     // Este es el que está buscando tu CrearTareaActivity y no encontraba
@@ -41,11 +44,6 @@ public class Tarea implements Serializable {
         this.notifUnidad = notifUnidad;
     }
 
-    // Constructor SIMPLE (Para evitar errores en otras partes del código)
-    public Tarea(String titulo, String fechaHora) {
-        this(titulo, fechaHora, "", "", 0, 0, 0, 0, 0, "AM", 0, 0, "AM", "30", "Minutos antes");
-    }
-
     // Getters
     public String getTitulo() { return titulo; }
     public String getFechaHora() { return fechaHora; }
@@ -63,8 +61,28 @@ public class Tarea implements Serializable {
     public int getHoraFin() { return horaFin; }
     public int getMinFin() { return minFin; }
     public String getAmPmFin() { return amPmFin; }
-
-    // Getters nuevos
     public String getNotifCantidad() { return notifCantidad; }
     public String getNotifUnidad() { return notifUnidad; }
+
+    // Método auxiliar para convertir hora inicio a formato 0-23
+    public int getHoraInicio24() {
+        if (amPmInicio.equals("AM")) {
+            if (horaInicio == 12) return 0; // 12 AM es 00:00
+            return horaInicio;
+        } else { // PM
+            if (horaInicio == 12) return 12; // 12 PM es 12:00
+            return horaInicio + 12; // 1 PM es 13:00
+        }
+    }
+
+    // Método auxiliar para convertir hora fin a formato 0-23
+    public int getHoraFin24() {
+        if (amPmFin.equals("AM")) {
+            if (horaFin == 12) return 0;
+            return horaFin;
+        } else { // PM
+            if (horaFin == 12) return 12;
+            return horaFin + 12;
+        }
+    }
 }

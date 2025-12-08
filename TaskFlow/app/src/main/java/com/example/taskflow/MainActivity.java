@@ -7,8 +7,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
+//import androidx.activity.result.ActivityResult;
+//import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,8 +21,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Lista de HOY
-    private RecyclerView rvTareasHoy;
     private TareaAdapter adapterHoy;
     private List<Tarea> listaHoy;
 
@@ -30,16 +28,13 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rvTareasManana;
     private TareaAdapter adapterManana;
     private List<Tarea> listaManana;
-    private TextView tvTituloManana; // Para poner "TAREAS PARA EL [FECHA]"
+    private TextView tvTituloManana; // Para poner "TAREAS PARA LA [FECHA]"
 
     ActivityResultLauncher<Intent> launcherCrearTarea = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        cargarListasSeparadas(); // Recargar tras crear/editar
-                    }
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    cargarListasSeparadas(); // Recargar tras crear/editar
                 }
             });
 
@@ -49,7 +44,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // 1. VINCULAR VISTAS Y ADAPTADORES
-        rvTareasHoy = findViewById(R.id.rvTareasHoy);
+        // Lista de HOY
+        RecyclerView rvTareasHoy = findViewById(R.id.rvTareasHoy);
         rvTareasHoy.setLayoutManager(new LinearLayoutManager(this));
         listaHoy = new ArrayList<>();
         adapterHoy = new TareaAdapter(listaHoy, crearListener());
@@ -70,11 +66,32 @@ public class MainActivity extends AppCompatActivity {
             int m = hoy.get(Calendar.MONTH);
             int a = hoy.get(Calendar.YEAR);
 
-            // Tarea para HOY
-            Repositorio.tareasGlobales.add(new Tarea("Bombardear la ULPGC", d + "/" + (m+1) + " · 11 AM", "...", "Las Palmas", d, m, a, 11, 0, "AM", 12, 0, "PM", "30", "Min"));
+            // Array de meses auxiliar para que coincida con CrearTareaActivity
+            String[] meses = {"Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"};
 
-            // Tarea para MAÑANA (d+1)
-            Repositorio.tareasGlobales.add(new Tarea("Ir al Supermercado", (d+1) + "/" + (m+1) + " · 1 PM", "...", "Mercadona", d+1, m, a, 13, 0, "PM", 14, 0, "PM", "1", "Hora"));
+            // Formateamos el mes y día para que se vean bonitos (ej: "05 Ene")
+            String nombreMes = meses[m];
+
+            // Tarea para HOY (Formato IDÉNTICO a CrearTareaActivity)
+            String fechaHoyStr = d + " " + nombreMes + " " + a + " · 11:00 AM - 12:00 PM";
+
+            Repositorio.tareasGlobales.add(new Tarea(
+                    "Bombardear la ULPGC",
+                    fechaHoyStr, // Usamos el string formateado
+                    "...", "Las Palmas",
+                    d, m, a,
+                    11, 0, "AM", 12, 0, "PM", "30", "Min"
+            ));
+
+            String fechaMananaStr = (d+1) + " " + nombreMes + " " + a + " · 01:00 PM - 02:00 PM";
+
+            Repositorio.tareasGlobales.add(new Tarea(
+                    "Ir al Supermercado",
+                    fechaMananaStr,
+                    "...", "Mercadona",
+                    d+1, m, a,
+                    13, 0, "PM", 14, 0, "PM", "1", "Hora"
+            ));
         }
 
         cargarListasSeparadas();
@@ -133,13 +150,43 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        // Actualizamos el título de la sección de futuro
+        // Ordenar la lista de futuro para que la fecha más próxima salga primero
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            listaManana.sort((t1, t2) -> {
+                if (t1.getAnio() != t2.getAnio()) return t1.getAnio() - t2.getAnio();
+                if (t1.getMes() != t2.getMes()) return t1.getMes() - t2.getMes();
+                return t1.getDia() - t2.getDia();
+            });
+            if (!listaManana.isEmpty()) primeraTareaFutura = listaManana.get(0);
+        }
+
+        // Detecta si hay tareas de diferentes días mezcladas
+        boolean variosDiasDistintos = false;
+        if (!listaManana.isEmpty()) {
+            Tarea primera = listaManana.get(0);
+            for (Tarea t : listaManana) {
+                // Si alguna tarea no coincide en día o mes con la primera, son fechas mixtas
+                if (t.getDia() != primera.getDia() || t.getMes() != primera.getMes()) {
+                    variosDiasDistintos = true;
+                    break;
+                }
+            }
+        }
+
+        // Actualiza el título de la sección de futuro
         if (!listaManana.isEmpty() && primeraTareaFutura != null) {
-            // Ponemos la fecha del primer elemento futuro como título
-            String fechaTitulo = primeraTareaFutura.getDia() + "/" + (primeraTareaFutura.getMes() + 1) + "/" + primeraTareaFutura.getAnio();
-            tvTituloManana.setText("TAREAS PARA EL " + fechaTitulo);
+            if (variosDiasDistintos) {
+                // Título Genérico
+                tvTituloManana.setText("PRÓXIMAS TAREAS (" + listaManana.size() + ")");
+            } else {
+                // Título con Fecha Específica
+                String[] meses = {"Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"};
+                String mesStr = (primeraTareaFutura.getMes() >= 0 && primeraTareaFutura.getMes() < 12) ? meses[primeraTareaFutura.getMes()] : "?";
+
+                tvTituloManana.setText("TAREAS PARA EL " + primeraTareaFutura.getDia() + " " + mesStr.toUpperCase());
+            }
         } else {
-            // Si la lista de futuro está vacía, mostramos un título genérico
+            // Lista vacía
             tvTituloManana.setText("PRÓXIMAS TAREAS");
         }
 
