@@ -338,6 +338,7 @@ public class CrearTareaActivity extends AppCompatActivity {
         spAno.setOnItemSelectedListener(listener);
     }
 
+    // Actualiza los días del mes
     private void actualizarDiasDelMes(Spinner spMes, Spinner spAno, Spinner spDia) {
         int mesIndex = spMes.getSelectedItemPosition();
         int anio = Integer.parseInt(spAno.getSelectedItem().toString());
@@ -352,6 +353,7 @@ public class CrearTareaActivity extends AppCompatActivity {
         spDia.setSelection(Math.min(prev, diasArr.length - 1));
     }
 
+    // Método genérico para generar números
     private String[] generarNumeros(int f) {
         List<String> l = new ArrayList<>();
         for (int k = 1; k <= f; k++) l.add(k < 10 ? "0" + k : String.valueOf(k));

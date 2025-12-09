@@ -65,6 +65,10 @@ public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.Ho
             int horaFin24 = t.getHoraFin24();
 
             // Comprueba si la hora de fin es menor que la de inicio
+            if (horaInicio24 == horaFin24) {
+                horaFin24 = horaInicio24 + 1;
+            }
+
             if (horaFin24 < horaInicio24) horaFin24 = 24;
 
             // Comprueba si la hora actual está dentro del rango de inicio y fin de la tarea
