@@ -1,15 +1,20 @@
 package com.example.taskflow;
 
+// Importación de librerías necesarias
 import java.io.Serializable;
 
 public class Tarea implements Serializable {
+    // Datos básicos
     private final String titulo;
     private final String fechaHora;
     private final String descripcion;
     private final String ubicacion;
-    private boolean expanded;
 
-    // Datos numéricos fecha
+    // Estado de la tarea y expandir tarea
+    private boolean expanded;
+    private boolean completada;
+
+    // Datos de la fecha
     private final int dia;
     private final int mes;
     private final int anio;
@@ -19,12 +24,11 @@ public class Tarea implements Serializable {
     private final int horaFin, minFin;
     private final String amPmFin;
 
-    // --- NUEVO: Datos de notificación ---
+    // Datos de notificaciones
     private final String notifCantidad;
     private final String notifUnidad;
 
-    // --- CONSTRUCTOR COMPLETO (15 DATOS) ---
-    // Este es el que está buscando tu CrearTareaActivity y no encontraba
+    // Constructor de la clase
     public Tarea(String titulo, String fechaHora, String descripcion, String ubicacion,
                  int dia, int mes, int anio,
                  int horaInicio, int minInicio, String amPmInicio,
@@ -35,6 +39,7 @@ public class Tarea implements Serializable {
         this.descripcion = descripcion;
         this.ubicacion = ubicacion;
         this.expanded = false;
+        this.completada = false;
 
         this.dia = dia; this.mes = mes; this.anio = anio;
         this.horaInicio = horaInicio; this.minInicio = minInicio; this.amPmInicio = amPmInicio;
@@ -44,13 +49,16 @@ public class Tarea implements Serializable {
         this.notifUnidad = notifUnidad;
     }
 
-    // Getters
+    // Getters y Setters
     public String getTitulo() { return titulo; }
     public String getFechaHora() { return fechaHora; }
     public String getDescripcion() { return descripcion; }
     public String getUbicacion() { return ubicacion; }
     public boolean isExpanded() { return expanded; }
     public void setExpanded(boolean expanded) { this.expanded = expanded; }
+
+    public boolean isCompletada() { return completada; }
+    public void setCompletada(boolean completada) { this.completada = completada; }
 
     public int getDia() { return dia; }
     public int getMes() { return mes; }

@@ -1,21 +1,20 @@
 package com.example.taskflow;
 
+// Importación de librerías necesarias
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-//import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-//import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-//import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -24,35 +23,35 @@ import java.util.Locale;
 
 public class CalendarioActivity extends AppCompatActivity {
 
+    // Variables
     private RecyclerView rvCalendario;
     private CalendarioAdapter adapter;
-    private List<Tarea> listaTareasVisual; // La lista que se ve en pantalla (filtrada por día)
-
-    // Variables Fecha
+    private List<Tarea> listaTareasVisual;
     private Calendar fechaSeleccionadaCalendar;
     private TextView tvMesAnioSelector, tvFechaSeleccionadaBig;
     private CalendarioAdapter.OnItemClickListener listenerAcciones;
 
+    // Métodos de ciclo de vida
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendario);
 
-        // Inicializar vistas
+        // Inicializa vistas
         tvMesAnioSelector = findViewById(R.id.tvMesAnioSelector);
         tvFechaSeleccionadaBig = findViewById(R.id.tvFechaSeleccionada);
         LinearLayout btnSelectorFecha = findViewById(R.id.btnSelectorFecha);
         rvCalendario = findViewById(R.id.rvCalendario);
         rvCalendario.setLayoutManager(new LinearLayoutManager(this));
 
-        // 1. Configurar Fecha Inicial (Hoy)
+        // Configura la fecha inicial
         fechaSeleccionadaCalendar = Calendar.getInstance();
         actualizarTextosFecha();
 
-        // 2. Inicializar Lista y Adaptador
+        // Inicializa la lista visual y el adaptador
         listaTareasVisual = new ArrayList<>();
-
         listenerAcciones = new CalendarioAdapter.OnItemClickListener() {
+            // Implementamos los métodos de la interfaz
             @Override
             public void onEditClick(Tarea tarea) {
                 Intent intent = new Intent(CalendarioActivity.this, CrearTareaActivity.class);
@@ -89,33 +88,47 @@ public class CalendarioActivity extends AppCompatActivity {
                 cargarTareasDelDia();
                 Toast.makeText(CalendarioActivity.this, "Tarea duplicada", Toast.LENGTH_SHORT).show();
             }
+
+            @Override
+            // Botón de completar
+            public void onCompleteClick(Tarea t) {
+                // Cambia el estado de la tarea
+                t.setCompletada(!t.isCompletada());
+                cargarTareasDelDia();
+                // Muestra un mensaje de confirmación
+                String mensaje = t.isCompletada() ? "Tarea completada" : "Tarea reactivada";
+                Toast.makeText(CalendarioActivity.this, mensaje, Toast.LENGTH_SHORT).show();
+            }
         };
         adapter = new CalendarioAdapter(listaTareasVisual, listenerAcciones);
         rvCalendario.setAdapter(adapter);
 
-        // 3. Cargar datos iniciales
+        // Carga los datos iniciales
         cargarTareasDelDia();
 
-        // 4. Listeners
+        // Configura el botón para mostrar el selector de fecha
         btnSelectorFecha.setOnClickListener(v -> mostrarSelectorFecha());
 
+        // Botón Agregar Tarea
         findViewById(R.id.fabAddCal).setOnClickListener(v -> startActivity(new Intent(CalendarioActivity.this, CrearTareaActivity.class)));
 
         setupToolbarButtons();
     }
 
-    // Se llama cada vez que volvemos a esta pantalla (ej: después de crear tarea)
+    // Se llama cada vez que volvemos a esta pantalla, después de crear una tarea
     @Override
     protected void onResume() {
         super.onResume();
         cargarTareasDelDia();
     }
 
-    // --- MÉTODOS CORE ---
-
+    // Método para cargar las tareas del día
+    @SuppressLint("NotifyDataSetChanged")
     private void cargarTareasDelDia() {
+        // Limpiamos la lista visual
         listaTareasVisual.clear();
 
+        // Variables de fecha
         int diaSel = fechaSeleccionadaCalendar.get(Calendar.DAY_OF_MONTH);
         int mesSel = fechaSeleccionadaCalendar.get(Calendar.MONTH);
         int anioSel = fechaSeleccionadaCalendar.get(Calendar.YEAR);
@@ -135,7 +148,9 @@ public class CalendarioActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
+    // Muestra el selector de fecha
     private void mostrarSelectorFecha() {
+        // Variables de fecha
         int anio = fechaSeleccionadaCalendar.get(Calendar.YEAR);
         int mes = fechaSeleccionadaCalendar.get(Calendar.MONTH);
         int dia = fechaSeleccionadaCalendar.get(Calendar.DAY_OF_MONTH);
@@ -147,22 +162,27 @@ public class CalendarioActivity extends AppCompatActivity {
         }, anio, mes, dia).show();
     }
 
+    @SuppressLint("SetTextI18n")
+    // Actualiza los textos del selector de fecha
     private void actualizarTextosFecha() {
+        // Actualiza el texto del selector de fecha, con el formato Español
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", new Locale("es", "ES"));
         String t = sdf.format(fechaSeleccionadaCalendar.getTime());
 
+        // Colocamos la primera letra en mayúscula si no lo está
         if (!t.isEmpty()) {
             tvMesAnioSelector.setText(t.substring(0, 1).toUpperCase() + t.substring(1));
         } else {
             tvMesAnioSelector.setText(t);
         }
 
+        // Actualiza el texto de la fecha seleccionada
         SimpleDateFormat sdf2 = new SimpleDateFormat("dd MMMM yyyy", new Locale("es", "ES"));
         tvFechaSeleccionadaBig.setText(sdf2.format(fechaSeleccionadaCalendar.getTime()).toUpperCase());
     }
 
     // --- BARRA DE HERRAMIENTAS ---
-
+    // Configura los botones de la barra de herramientas
     private void setupToolbarButtons() {
         findViewById(R.id.btnBuscar).setOnClickListener(v -> mostrarDialogoBusqueda());
 
@@ -175,6 +195,7 @@ public class CalendarioActivity extends AppCompatActivity {
         });
     }
 
+    // Muestra el diálogo de búsqueda
     private void mostrarDialogoBusqueda() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View view = getLayoutInflater().inflate(R.layout.dialog_buscar, null);
@@ -191,7 +212,9 @@ public class CalendarioActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    // Filtra la lista de tareas según el texto ingresado en el diálogo de búsqueda
     private void filtrarCalendario(String texto) {
+        // Si no hay texto, cargamos las tareas del día
         if (texto.isEmpty()) {
             cargarTareasDelDia();
             return;
@@ -205,6 +228,7 @@ public class CalendarioActivity extends AppCompatActivity {
             }
         }
 
+        // Si no hay resultados, mostramos un mensaje, sino, mostramos la lista filtrada
         if (listaFiltrada.isEmpty()) {
             Toast.makeText(this, "No se ha encontrado en este día.", Toast.LENGTH_SHORT).show();
         } else {CalendarioAdapter adapterFiltro = new CalendarioAdapter(listaFiltrada, listenerAcciones);

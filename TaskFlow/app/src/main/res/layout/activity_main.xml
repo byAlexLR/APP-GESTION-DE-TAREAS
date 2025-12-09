@@ -11,7 +11,8 @@
         android:layout_height="match_parent"
         android:fillViewport="true"
         android:clipToPadding="false"
-        android:paddingBottom="80dp"> <LinearLayout
+        android:paddingBottom="80dp"> 
+        <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -94,6 +95,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:nestedScrollingEnabled="false"/>
+            
+        <TextView
+            android:id="@+id/tvTituloCompletadas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TAREAS COMPLETADAS"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTareasCompletadas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:visibility="gone"/>
 
     </LinearLayout>
     </androidx.core.widget.NestedScrollView>
