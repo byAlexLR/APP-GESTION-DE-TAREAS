@@ -1,0 +1,100 @@
+<resources>
+    <string name="app_name">TaskFlow</string>
+    <string name="conexion_bluetooth">CONEXIÓN BLUETOOTH</string>
+    <string name="estado_del_servicio">ESTADO DEL SERVICIO</string>
+    <string name="estado_desconocido">Desconocido</string>
+    <string name="encender">ENCENDER</string>
+    <string name="apagar">APAGAR</string>
+    <string name="buscar">BUSCAR</string>
+    <string name="dispositivos_disponibles">DISPOSITIVOS ENCONTRADOS</string>
+    <string name="titulo_tarea_ejemplo">Título Tarea</string>
+    <string name="fecha_hora_ejemplo">Fecha y hora</string>
+    <string name="descripcion_ejemplo">Texto de la descripción…</string>
+    <string name="ubicacion_ejemplo">Texto de la ubicación…</string>
+
+    <string name="bt_no_soportado">NO SOPORTADO</string>
+    <string name="bt_encendido">ENCENDIDO</string>
+    <string name="bt_apagado">APAGADO</string>
+    <string name="bt_cambiando">CAMBIANDO…</string>
+    <string name="bt_buscando">Comprobando permisos…</string>
+    <string name="bt_ya_encendido">El Bluetooth ya está encendido</string>
+    <string name="bt_no_dispositivos">No se encontraron dispositivos nuevos</string>
+    <string name="bt_dispositivo_sin_nombre">Dispositivo sin nombre</string>
+    <string name="bt_elige_destinatario">Elige destinatario para: %1$s</string>
+    <string name="bt_esperando_conexion">Esperando conexión…</string>
+    <string name="bt_recepcion_fallida">Recepción cancelada o fallida.</string>
+    <string name="bt_conectando">Conectando…</string>
+    <string name="bt_enviado">¡Enviado!</string>
+    <string name="bt_error_envio">Error: %1$s</string>
+    <string name="bt_recibida_tarea">¡Recibida: %1$s!</string>
+    <string name="bt_error_inicio_escaneo">Error al iniciar</string>
+    <string name="permisos_denegados">Permisos denegados</string>
+    <string name="bt_error_reintentar">Error. Intenta de nuevo.</string>
+    <string name="bt_completado">Completado: %1$s</string>
+    <string name="bt_conectando_con">Conectando con %1$s…</string>
+    <string name="bt_enviando_datos">Enviando datos…</string>
+    <string name="bt_envio_fallido">Falló el envío: %1$s</string>
+    <string name="bt_desactivado">Bluetooth desactivado</string>
+    <string name="bt_buscando_dispositivos">Buscando dispositivos…</string>
+    <string name="bt_falta_permiso">Falta permiso de conexión</string>
+
+    <string name="calendario">CALENDARIO</string>
+    <string name="anadir">AÑADIR</string>
+    <string name="tareas_para_hoy">TAREAS PARA HOY</string>
+    <string name="proximas_tareas">PRÓXIMAS TAREAS</string>
+    <string name="tareas_completadas">TAREAS COMPLETADAS</string>
+    <string name="logo_desc">Logo de TaskFlow</string>
+    <string name="bluetooth_desc">Configuración de Bluetooth</string>
+    <string name="expandir_desc">Añadir nueva tarea</string>
+
+    <string name="calendario_titulo">CALENDARIO</string>
+    <string name="desc_buscar">Buscar fecha</string>
+    <string name="desc_ver_mes">Cambiar vista</string>
+    <string name="desc_anadir_evento">Añadir nuevo evento</string>
+
+    <string name="crear_nueva_tarea">CREAR NUEVA TAREA</string>
+    <string name="lbl_nombre">NOMBRE</string>
+    <string name="hint_nombre_ejemplo">Ej. Ir al gimnasio</string>
+    <string name="lbl_fecha_hora">FECHA Y HORA</string>
+    <string name="lbl_descripcion">DESCRIPCIÓN</string>
+    <string name="hint_detalles">Escribe detalles…</string>
+    <string name="lbl_ubicacion">UBICACIÓN</string>
+    <string name="lbl_notificacion">NOTIFICACIÓN</string>
+    <string name="lbl_anadir_colaborador">AÑADIR COLABORADOR</string>
+
+    <string name="desc_guardar_tarea">Guardar tarea</string>
+    <string name="desc_anadir_notificacion">Añadir nueva notificación</string>
+    <string name="desc_anadir_colaborador">Añadir nuevo colaborador</string>
+
+    <string name="titulo_buscar_tarea">BUSCAR TAREA</string>
+    <string name="hint_escribe_nombre">Escribe el nombre…</string>
+    <string name="cancelar">CANCELAR</string>
+
+    <string name="desc_expandir_detalles">Expandir detalles</string>
+    <string name="desc_editar_tarea">Editar tarea</string>
+    <string name="desc_compartir_tarea">Compartir tarea</string>
+    <string name="desc_opciones_tarea">Más opciones</string>
+
+    <string name="hint_nombre_colaborador">Nombre del colaborador</string>
+
+    <string name="hint_cantidad_defecto">00</string>
+
+    <string name="opcion_compartir_texto">Enviar texto (WhatsApp, Correo…)</string>
+    <string name="opcion_compartir_bt">Transferir por Bluetooth</string>
+    <string name="titulo_compartir">¿Cómo quieres compartir la tarea?</string>
+    <string name="compartir_tarea_chooser">Compartir tarea…</string>
+    <string name="formato_asunto_compartir">Tarea: %1$s</string>
+    <string name="formato_mensaje_compartir">📅 Fecha: %1$s\n📝 Nota: %2$s\n📍 Lugar: %3$s</string>
+    <string name="menu_marcar_hecha">Marcar como hecha</string>
+    <string name="menu_desmarcar_hecha">Desmarcar como hecha</string>
+    <string name="menu_duplicar">Duplicar</string>
+    <string name="menu_eliminar">Eliminar</string>
+    <string name="septiembre_2025">Septiembre 2025</string>
+    <string name="_28_noviembre_2025">28 NOVIEMBRE 2025</string>
+    <string name="puntos">…</string>
+    <string name="tarea_recibida">TAREA RECIBIDA</string>
+    <string name="nombre_de_la_tarea">Nombre de la Tarea</string>
+    <string name="fecha_y_ubicaci_n">Fecha y ubicación...</string>
+    <string name="aceptar_tarea">ACEPTAR TAREA</string>
+    <string name="rechazar">RECHAZAR</string>
+</resources>
