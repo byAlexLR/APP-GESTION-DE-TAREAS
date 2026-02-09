@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permisos para la conexión a Internet -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Permisos para Bluetooth (Versiones inferiores a Android 12) -->
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
@@ -14,6 +17,17 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="30" />
 
+    <!-- Permisos para la lectura de archivos multimedia -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+
+    <!-- Permisos para la lectura de archivos multimedia (Versiones superiores a Android 12) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:ignore="PhotoAndVideoPolicy,SelectedPhotoAccess" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:ignore="PhotoAndVideoPolicy,SelectedPhotoAccess" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+
+    <!-- Permisos para la lectura de archivos multimedia (Versiones superiores a Android 13) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -23,6 +37,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TaskFlow"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
         <activity
@@ -36,6 +51,11 @@
 
         <activity android:name=".CrearTareaActivity" />
         <activity android:name=".CalendarioActivity" />
+
+        <activity
+            android:name=".VisualizadorActivity"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize" />
 
         <service
             android:name=".BluetoothReceiver"

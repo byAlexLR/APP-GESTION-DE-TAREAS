@@ -2,6 +2,8 @@ package com.example.taskflow;
 
 // Importa las líbrerias necesarias
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Tarea implements Serializable {
     // Datos básicos
@@ -28,6 +30,14 @@ public class Tarea implements Serializable {
     private final String notifCantidad;
     private final String notifUnidad;
 
+    // Multimedia
+    private String imagenUri; // URI de la imagen adjunta
+    private String videoUri;  // URI del vídeo adjunto
+    private String audioUri;  // URI del audio adjunto
+
+    // Colaboradores
+    private List<String> colaboradores;
+
     // Constructor de la clase
     public Tarea(String titulo, String fechaHora, String descripcion, String ubicacion,
                  int dia, int mes, int anio,
@@ -47,6 +57,10 @@ public class Tarea implements Serializable {
 
         this.notifCantidad = notifCantidad;
         this.notifUnidad = notifUnidad;
+        this.imagenUri = null;
+        this.videoUri = null;
+        this.audioUri = null;
+        this.colaboradores = new ArrayList<>();
     }
 
     // Getters y Setters
@@ -71,6 +85,18 @@ public class Tarea implements Serializable {
     public String getAmPmFin() { return amPmFin; }
     public String getNotifCantidad() { return notifCantidad; }
     public String getNotifUnidad() { return notifUnidad; }
+
+    public String getImagenUri() { return imagenUri; }
+    public void setImagenUri(String imagenUri) { this.imagenUri = imagenUri; }
+
+    public String getVideoUri() { return videoUri; }
+    public void setVideoUri(String videoUri) { this.videoUri = videoUri; }
+
+    public String getAudioUri() { return audioUri; }
+    public void setAudioUri(String audioUri) { this.audioUri = audioUri; }
+
+    public List<String> getColaboradores() { return colaboradores; }
+    public void setColaboradores(List<String> colaboradores) { this.colaboradores = colaboradores; }
 
     // Método auxiliar para convertir hora inicio a formato 0-23
     public int getHoraInicio24() {

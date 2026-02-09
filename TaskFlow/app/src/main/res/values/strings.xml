@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TaskFlow</string>
     <string name="conexion_bluetooth">CONEXIÓN BLUETOOTH</string>
@@ -60,7 +61,7 @@
     <string name="hint_detalles">Escribe detalles…</string>
     <string name="lbl_ubicacion">UBICACIÓN</string>
     <string name="lbl_notificacion">NOTIFICACIÓN</string>
-    <string name="lbl_anadir_colaborador">AÑADIR COLABORADOR</string>
+    <string name="lbl_anadir_colaborador">COLABORADOR</string>
 
     <string name="desc_guardar_tarea">Guardar tarea</string>
     <string name="desc_anadir_notificacion">Añadir nueva notificación</string>
@@ -94,7 +95,31 @@
     <string name="puntos">…</string>
     <string name="tarea_recibida">TAREA RECIBIDA</string>
     <string name="nombre_de_la_tarea">Nombre de la Tarea</string>
-    <string name="fecha_y_ubicaci_n">Fecha y ubicación...</string>
+    <string name="fecha_y_ubicaci_n">Fecha y ubicación…</string>
     <string name="aceptar_tarea">ACEPTAR TAREA</string>
     <string name="rechazar">RECHAZAR</string>
+
+    <!-- Multimedia -->
+    <string name="lbl_multimedia">MULTIMEDIA</string>
+    <string name="desc_adjuntar_imagen">Adjuntar imagen</string>
+    <string name="desc_quitar_imagen">Quitar imagen</string>
+    <string name="desc_adjuntar_video">Adjuntar vídeo</string>
+    <string name="desc_quitar_video">Quitar vídeo</string>
+    <string name="desc_adjuntar_audio">Adjuntar audio</string>
+    <string name="desc_quitar_audio">Quitar audio</string>
+    <string name="lbl_video">VÍDEO</string>
+    <string name="lbl_audio">AUDIO</string>
+    <string name="lbl_imagen">IMAGEN</string>
+    <string name="lbl_colaboradores">COLABORADORES</string>
+    <string name="barco_de_chanquete">El Barco de Chanquete</string>
+    <string name="audio">Audio</string>
+    <string name="video">Vídeo</string>
+    <string name="imagen">Imagen</string>
+    <string name="texto_de_colaboradores">Texto de colaboradores</string>
+    <string name="nombre_del_audio">Nombre del Audio</string>
+    <string name="_00_00">00:00</string>
+    <string name="desc_reproducir_pausar">Reproducir o pausar audio</string>
+    <string name="desc_reproducir">Reproducir audio</string>
+    <string name="desc_pausar">Pausar audio</string>
+    <string name="desc_cerrar_visor">Cerrar visualizador</string>
 </resources>

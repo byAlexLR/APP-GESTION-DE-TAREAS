@@ -4,21 +4,28 @@ package com.example.taskflow;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import android.util.Log;
 
+// Clase principal para crear o editar tareas
 public class CrearTareaActivity extends AppCompatActivity {
 
     // Variables globales
@@ -32,6 +39,59 @@ public class CrearTareaActivity extends AppCompatActivity {
     // Contenedores de notificaciones y colaboradores
     private LinearLayout containerNotificaciones, containerColaboradores;
 
+    // Multimedia
+    private ImageView imgPreview;
+    private TextView tvVideoName, tvAudioName;
+    private View previewImagenLayout, previewVideoLayout, previewAudioLayout;
+    private String imagenUriSeleccionada = null;
+    private String videoUriSeleccionada = null;
+    private String audioUriSeleccionada = null;
+
+    // Launchers para seleccionar imagen
+    private final ActivityResultLauncher<Intent> launcherImagen = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    if (uri != null) {
+                        getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        imagenUriSeleccionada = uri.toString();
+                        actualizarPreviewsMultimedia();
+                    }
+                }
+            }
+    );
+
+    // Launcher para seleccionar video
+    private final ActivityResultLauncher<Intent> launcherVideo = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    if (uri != null) {
+                        getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        videoUriSeleccionada = uri.toString();
+                        actualizarPreviewsMultimedia();
+                    }
+                }
+            }
+    );
+
+    // Launcher para seleccionar audio
+    private final ActivityResultLauncher<Intent> launcherAudio = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    if (uri != null) {
+                        getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        audioUriSeleccionada = uri.toString();
+                        actualizarPreviewsMultimedia();
+                    }
+                }
+            }
+    );
+
     // Variables auxiliares
     private int posicionOriginal = -1;
     private final String[] meses = {"Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"};
@@ -40,7 +100,7 @@ public class CrearTareaActivity extends AppCompatActivity {
     private final String[] unidadesTiempo = {"Minutos antes", "Horas antes", "Días antes", "Segundos antes"};
 
     @Override
-    // Método principal de la actividad
+    // Método principal
     protected void onCreate(Bundle savedInstanceState) {
         // Llamada al método onCreate de la superclase
         super.onCreate(savedInstanceState);
@@ -63,15 +123,15 @@ public class CrearTareaActivity extends AppCompatActivity {
         findViewById(R.id.btnGuardar).setOnClickListener(v -> guardarTarea());
     }
 
-    // --- VINCULACIÓN DE VISTAS ---
+    // Método para vincular las vistas
     private void vincularVistas() {
-        // Vistas de la actividad
+        // Vistas principales
         tvTituloPantalla = findViewById(R.id.tvTituloPantalla);
         etNombre = findViewById(R.id.etNombre);
         etDesc = findViewById(R.id.etDesc);
         etUbicacion = findViewById(R.id.etUbicacion);
 
-        // Spinners de las fechas
+        // Spinners de fecha y hora
         spDiaInicio = findViewById(R.id.spDiaInicio);
         spMesInicio = findViewById(R.id.spMesInicio);
         spAnoInicio = findViewById(R.id.spAnoInicio);
@@ -88,20 +148,19 @@ public class CrearTareaActivity extends AppCompatActivity {
         // Contenedores de notificaciones y colaboradores
         containerNotificaciones = findViewById(R.id.containerNotificaciones);
         containerColaboradores = findViewById(R.id.containerColaboradores);
+
+        // Multimedia
+        imgPreview = findViewById(R.id.imgPreview);
+        tvVideoName = findViewById(R.id.tvVideoName);
+        tvAudioName = findViewById(R.id.tvAudioName);
+        previewImagenLayout = findViewById(R.id.previewImagenLayout);
+        previewVideoLayout = findViewById(R.id.previewVideoLayout);
+        previewAudioLayout = findViewById(R.id.previewAudioLayout);
     }
 
-    // Método mejorado para generar números (Para las horas y minutos)
-    private String[] generarNumeros(int inicio, int fin) {
-        List<String> l = new ArrayList<>();
-        for (int k = inicio; k <= fin; k++) {
-            l.add(k < 10 ? "0" + k : String.valueOf(k));
-        }
-        return l.toArray(new String[0]);
-    }
-
-    // --- CONFIGURAR SPINNERS ---
+    // Método para configurar los spinners
     private void configurarSpinners() {
-        // Generar los números para los spinners
+        // Configuramos los spinners con los datos correspondientes
         setupSpinner(spMesInicio, meses);
         setupSpinner(spAnoInicio, anos);
         setupSpinner(spHoraInicio, generarNumeros(1, 12));
@@ -113,39 +172,122 @@ public class CrearTareaActivity extends AppCompatActivity {
         setupSpinner(spMinFin, generarNumeros(0, 59));
         setupSpinner(spAmPmFin, ampm);
 
-        // Busca la primera fila de notificaciones
+        // Configuramos el spinner de la primera fila de notificaciones si existe
         if (containerNotificaciones.getChildCount() > 0) {
-            // Si hay filas, obtenemos la primera
+            // Obtenemos la primera fila y configuramos su spinner
             View primeraFila = containerNotificaciones.getChildAt(0);
             Spinner spUnidad = primeraFila.findViewById(R.id.spUnidad);
-            // Si la hemos encontrado, la rellenamos
+            // Configuramos el spinner con las unidades de tiempo
             if (spUnidad != null) {
                 setupSpinner(spUnidad, unidadesTiempo);
             }
         }
-        // Actualiza los días del mes
+
+        // Actualizamos los días del mes según el mes y año seleccionados
         actualizarDiasDelMes(spMesInicio, spAnoInicio, spDiaInicio);
         actualizarDiasDelMes(spMesFin, spAnoFin, spDiaFin);
     }
 
-    // --- LISTENERS ---
+    // Método para configurar los listeners
     private void configurarListeners() {
-        // Configuramos los listeners de las fechas
+        // Listeners para actualizar los días del mes al cambiar mes o año
         configurarListenerFechas(spMesInicio, spAnoInicio, spDiaInicio);
         configurarListenerFechas(spMesFin, spAnoFin, spDiaFin);
 
-        // Al pulsar + Notificación
+        // Agregar filas de notificaciones y colaboradores
         findViewById(R.id.btnAddNotif).setOnClickListener(v -> agregarFila(R.layout.item_notificacion, containerNotificaciones));
-
-        // Al pulsar + Colaborador
         findViewById(R.id.btnAddColab).setOnClickListener(v -> agregarFila(R.layout.item_colaborador, containerColaboradores));
+
+        // Agregar multimedia
+        findViewById(R.id.btnSelectImagen).setOnClickListener(v -> seleccionarMultimedia("image/*", launcherImagen));
+        findViewById(R.id.btnSelectVideo).setOnClickListener(v -> seleccionarMultimedia("video/*", launcherVideo));
+        findViewById(R.id.btnSelectAudio).setOnClickListener(v -> seleccionarMultimedia("audio/*", launcherAudio));
+
+        // Eliminar multimedia
+        findViewById(R.id.btnRemoveImagen).setOnClickListener(v -> {
+            imagenUriSeleccionada = null;
+            actualizarPreviewsMultimedia();
+        });
+        findViewById(R.id.btnRemoveVideo).setOnClickListener(v -> {
+            videoUriSeleccionada = null;
+            actualizarPreviewsMultimedia();
+        });
+        findViewById(R.id.btnRemoveAudio).setOnClickListener(v -> {
+            audioUriSeleccionada = null;
+            actualizarPreviewsMultimedia();
+        });
+    }
+    // Método para seleccionar multimedia
+    private void seleccionarMultimedia(String mimeType, ActivityResultLauncher<Intent> launcher) {
+        // Crear un intent para seleccionar un documento
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        // Filtrar por el tipo de multimedia especificado
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        // Establecer el tipo de archivo
+        intent.setType(mimeType);
+        launcher.launch(intent);
+    }
+
+    // Método para actualizar las vistas previas de multimedia
+    private void actualizarPreviewsMultimedia() {
+        // Imagen
+        if (imagenUriSeleccionada != null) {
+            previewImagenLayout.setVisibility(View.VISIBLE);
+            imgPreview.setImageURI(Uri.parse(imagenUriSeleccionada));
+        } else {
+            previewImagenLayout.setVisibility(View.GONE);
+        }
+
+        // Video
+        if (videoUriSeleccionada != null) {
+            previewVideoLayout.setVisibility(View.VISIBLE);
+            tvVideoName.setText(getFileName(Uri.parse(videoUriSeleccionada)));
+        } else {
+            previewVideoLayout.setVisibility(View.GONE);
+        }
+
+        // Audio
+        if (audioUriSeleccionada != null) {
+            previewAudioLayout.setVisibility(View.VISIBLE);
+            tvAudioName.setText(getFileName(Uri.parse(audioUriSeleccionada)));
+        } else {
+            previewAudioLayout.setVisibility(View.GONE);
+        }
+    }
+
+    @SuppressLint("Range")
+    // Método para obtener el nombre del archivo a partir de su URI
+    private String getFileName(Uri uri) {
+        String result = null;
+        // Comprobar si el esquema es "content"
+        if (uri != null && "content".equals(uri.getScheme())) {
+            // Consultar el ContentResolver para obtener el nombre del archivo
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                // Obtener el nombre del archivo
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            }
+        }
+        // Si no se pudo obtener el nombre, usar la ruta del URI
+        if (result == null && uri != null) {
+            result = uri.getPath(); // Obtener la ruta del URI
+            // Extraer el nombre del archivo de la ruta
+            if (result != null) {
+                int cut = result.lastIndexOf('/');
+                if (cut != -1) {
+                    result = result.substring(cut + 1);
+                }
+            }
+        }
+        // Devolver el nombre del archivo o un valor por defecto
+        return result != null ? result : "Archivo desconocido";
     }
 
     // Método genérico para añadir filas dinámicas
     private void agregarFila(int layoutId, LinearLayout container) {
         // Creamos la vista de la fila
         View view = getLayoutInflater().inflate(layoutId, container, false);
-
         // Si es una notificación, rellenamos el spinner de unidades
         if (layoutId == R.layout.item_notificacion) {
             Spinner spUnidad = view.findViewById(R.id.spUnidad);
@@ -155,7 +297,7 @@ public class CrearTareaActivity extends AppCompatActivity {
         container.addView(view);
     }
 
-    // --- GUARDAR ---
+    // Método para guardar la tarea
     private void guardarTarea() {
         // Recoge el nombre de la tarea
         String nombre = etNombre.getText().toString().trim();
@@ -176,8 +318,7 @@ public class CrearTareaActivity extends AppCompatActivity {
 
         try {
             // Recoger datos de las fechas
-            String diaStrSpinner = spDiaInicio.getSelectedItem().toString();
-            dia = Integer.parseInt(diaStrSpinner);
+            dia = Integer.parseInt(spDiaInicio.getSelectedItem().toString());
             mes = spMesInicio.getSelectedItemPosition();
             anio = Integer.parseInt(spAnoInicio.getSelectedItem().toString());
             horaIn = Integer.parseInt(spHoraInicio.getSelectedItem().toString());
@@ -210,6 +351,26 @@ public class CrearTareaActivity extends AppCompatActivity {
                 horaIn, minIn, apIn, horaOut, minOut, apOut,
                 notifCant, notifUni);
 
+        // Asigna la multimedia seleccionada
+        nuevaTarea.setImagenUri(imagenUriSeleccionada);
+        nuevaTarea.setVideoUri(videoUriSeleccionada);
+        nuevaTarea.setAudioUri(audioUriSeleccionada);
+
+        // Asigna los colaboradores
+        List<String> colabs = new ArrayList<>();
+        for (int i = 0; i < containerColaboradores.getChildCount(); i++) {
+            // Obtiene el nombre del colaborador de cada fila
+            View v = containerColaboradores.getChildAt(i);
+            EditText et = v.findViewById(R.id.etNombreColaborador);
+            // Añade el colaborador si no está vacío
+            if (et != null) {
+                String s = et.getText().toString().trim();
+                if (!s.isEmpty()) colabs.add(s);
+            }
+        }
+        // Asigna la lista de colaboradores a la tarea
+        nuevaTarea.setColaboradores(colabs);
+
         // Si estamos editando, actualiza la tarea. Sino, la añade
         if (posicionOriginal != -1 && posicionOriginal < Repositorio.tareasGlobales.size()) {
             Tarea tareaAntigua = Repositorio.tareasGlobales.get(posicionOriginal);
@@ -228,13 +389,32 @@ public class CrearTareaActivity extends AppCompatActivity {
     }
 
     @SuppressLint("SetTextI18n")
-    // Cargamos los datos de la tarea
+    // Cargamos los datos de la tarea a editar
     private void cargarDatosTarea(Tarea t) {
         // Rellena los datos
         tvTituloPantalla.setText("EDITAR TAREA");
         etNombre.setText(t.getTitulo());
         etDesc.setText(t.getDescripcion());
         etUbicacion.setText(t.getUbicacion());
+
+        // Carga los datos de multimedia
+        imagenUriSeleccionada = t.getImagenUri();
+        videoUriSeleccionada = t.getVideoUri();
+        audioUriSeleccionada = t.getAudioUri();
+        actualizarPreviewsMultimedia();
+
+        // Carga los colaboradores
+        containerColaboradores.removeAllViews();
+        if (t.getColaboradores() != null && !t.getColaboradores().isEmpty()) {
+            for (String s : t.getColaboradores()) {
+                View v = getLayoutInflater().inflate(R.layout.item_colaborador, containerColaboradores, false);
+                EditText et = v.findViewById(R.id.etNombreColaborador);
+                if (et != null) et.setText(s);
+                containerColaboradores.addView(v);
+            }
+        } else {
+            agregarFila(R.layout.item_colaborador, containerColaboradores);
+        }
 
         // Rellena la fecha y hora de inicio
         seleccionarSpinner(spMesInicio, meses[t.getMes()]);
@@ -317,7 +497,7 @@ public class CrearTareaActivity extends AppCompatActivity {
         seleccionarSpinner(spAmPmFin, amPmFinStr);
     }
 
-    // --- HELPERS ---
+    // Configura los listeners para actualizar los días del mes
     private void configurarListenerFechas(Spinner spMes, Spinner spAno, Spinner spDiaDestino) {
         // Listener para actualizar los días del mes al cambiar mes/año
         AdapterView.OnItemSelectedListener listener = new AdapterView.OnItemSelectedListener() {
@@ -326,42 +506,52 @@ public class CrearTareaActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
                 actualizarDiasDelMes(spMes, spAno, spDiaDestino);
             }
-
             @Override
             // Cuando no cambia nada
-            public void onNothingSelected(AdapterView<?> p) {
-            }
+            public void onNothingSelected(AdapterView<?> p) {}
         };
-
         // Configuramos los listeners
         spMes.setOnItemSelectedListener(listener);
         spAno.setOnItemSelectedListener(listener);
     }
 
-    // Actualiza los días del mes
+    // Actualiza los días del mes según el mes y año seleccionados
     private void actualizarDiasDelMes(Spinner spMes, Spinner spAno, Spinner spDia) {
+        // Calculamos el número de días del mes seleccionado
         int mesIndex = spMes.getSelectedItemPosition();
         int anio = Integer.parseInt(spAno.getSelectedItem().toString());
         int dias = 31;
+        // Ajustamos según el mes y si es bisiesto
         if (mesIndex == 3 || mesIndex == 5 || mesIndex == 8 || mesIndex == 10) dias = 30;
         else if (mesIndex == 1)
             dias = ((anio % 4 == 0 && anio % 100 != 0) || (anio % 400 == 0)) ? 29 : 28;
 
+        // Generamos el array de días y lo asignamos al spinner
         String[] diasArr = generarNumeros(dias);
         int prev = spDia.getSelectedItemPosition();
         setupSpinner(spDia, diasArr);
         spDia.setSelection(Math.min(prev, diasArr.length - 1));
     }
 
-    // Método genérico para generar números
+    // Método genérico para generar números desde 1 hasta f
     private String[] generarNumeros(int f) {
         List<String> l = new ArrayList<>();
         for (int k = 1; k <= f; k++) l.add(k < 10 ? "0" + k : String.valueOf(k));
         return l.toArray(new String[0]);
     }
 
+    // Método genérico para generar números entre un rango
+    private String[] generarNumeros(int inicio, int fin) {
+        List<String> l = new ArrayList<>();
+        for (int k = inicio; k <= fin; k++) {
+            l.add(k < 10 ? "0" + k : String.valueOf(k));
+        }
+        return l.toArray(new String[0]);
+    }
+
     // Método genérico para configurar un Spinner
     private void setupSpinner(Spinner s, String[] d) {
+        // Crea y asigna el adaptador al spinner
         ArrayAdapter<String> a = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, d);
         a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(a);

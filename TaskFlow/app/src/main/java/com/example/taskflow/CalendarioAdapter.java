@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import java.util.Objects;
 
+// Clase que implementa el adaptador para la lista de tareas
 public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.HoraViewHolder> {
 
     // Variables
@@ -91,6 +93,7 @@ public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.Ho
             // Obtenemos los LayoutParams para modificar márgenes dinámicamente
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) holder.cardTarea.getLayoutParams();
             final Tarea finalTarea = tareaEncontrada;
+            Context context = holder.itemView.getContext();
 
             if (esHoraInicio) {
                 holder.layoutContenidoPrincipal.setVisibility(View.VISIBLE);
@@ -120,6 +123,83 @@ public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.Ho
 
                 holder.tvUbi.setText(finalTarea.getUbicacion());
                 holder.tvDesc.setText(generarTextoDescripcion(finalTarea));
+
+                // Configurar lógica de botones y expansion
+                boolean isExpanded = finalTarea.isExpanded();
+                // Expansión de la vista
+                holder.layoutDetalles.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+                holder.imgArrow.setImageResource(isExpanded ? R.drawable.ic_arrow_up : R.drawable.ic_arrow_down);
+
+                // Configura los archivos multimedia y colaboradores si está expandido
+                if (isExpanded) {
+                    boolean tieneMultimedia = false;
+
+                    // Imagen
+                    if (finalTarea.getImagenUri() != null && !finalTarea.getImagenUri().isEmpty()) {
+                        if(holder.cardAdjuntoImagen != null) {
+                            holder.cardAdjuntoImagen.setVisibility(View.VISIBLE);
+                            holder.tvNombreImagen.setText(getFileName(finalTarea.getImagenUri()));
+                            holder.cardAdjuntoImagen.setOnClickListener(v -> abrirVisualizador(context, finalTarea.getImagenUri(), "image"));
+                            tieneMultimedia = true;
+                        }
+                    } else if(holder.cardAdjuntoImagen != null) {
+                        holder.cardAdjuntoImagen.setVisibility(View.GONE);
+                    }
+
+                    // Video
+                    if (finalTarea.getVideoUri() != null && !finalTarea.getVideoUri().isEmpty()) {
+                        if(holder.cardAdjuntoVideo != null) {
+                            holder.cardAdjuntoVideo.setVisibility(View.VISIBLE);
+                            holder.tvNombreVideo.setText(getFileName(finalTarea.getVideoUri()));
+                            holder.cardAdjuntoVideo.setOnClickListener(v -> abrirVisualizador(context, finalTarea.getVideoUri(), "video"));
+                            tieneMultimedia = true;
+                        }
+                    } else if(holder.cardAdjuntoVideo != null) {
+                        holder.cardAdjuntoVideo.setVisibility(View.GONE);
+                    }
+
+                    // Audio
+                    if (finalTarea.getAudioUri() != null && !finalTarea.getAudioUri().isEmpty()) {
+                        if(holder.cardAdjuntoAudio != null) {
+                            holder.cardAdjuntoAudio.setVisibility(View.VISIBLE);
+                            holder.tvNombreAudio.setText(getFileName(finalTarea.getAudioUri()));
+                            holder.cardAdjuntoAudio.setOnClickListener(v -> abrirVisualizador(context, finalTarea.getAudioUri(), "audio"));
+                            tieneMultimedia = true;
+                        }
+                    } else if(holder.cardAdjuntoAudio != null) {
+                        holder.cardAdjuntoAudio.setVisibility(View.GONE);
+                    }
+
+                    // Mostrar u ocultar sección multimedia
+                    if(holder.lblMultimediaItem != null) holder.lblMultimediaItem.setVisibility(tieneMultimedia ? View.VISIBLE : View.GONE);
+                    if(holder.scrollMultimedia != null) holder.scrollMultimedia.setVisibility(tieneMultimedia ? View.VISIBLE : View.GONE);
+
+                    // Colaboradores
+                    if (finalTarea.getColaboradores() != null && !finalTarea.getColaboradores().isEmpty()) {
+                        // Mostrar lista de colaboradores
+                        if(holder.lblColaboradoresItem != null) holder.lblColaboradoresItem.setVisibility(View.VISIBLE);
+                        if(holder.tvColaboradoresBody != null) {
+                            holder.tvColaboradoresBody.setVisibility(View.VISIBLE);
+                            StringBuilder sb = new StringBuilder();
+                            // Construye la lista de colaboradores separados por comas
+                            for (int i = 0; i < finalTarea.getColaboradores().size(); i++) {
+                                sb.append(finalTarea.getColaboradores().get(i));
+                                if (i < finalTarea.getColaboradores().size() - 1) sb.append(", ");
+                            }
+                            holder.tvColaboradoresBody.setText(sb.toString());
+                        }
+                    } else {
+                        // Ocultar sección de colaboradores si no hay
+                        if(holder.lblColaboradoresItem != null) holder.lblColaboradoresItem.setVisibility(View.GONE);
+                        if(holder.tvColaboradoresBody != null) holder.tvColaboradoresBody.setVisibility(View.GONE);
+                    }
+                } else {
+                    // Ocultar multimedia y colaboradores si no está expandido
+                    if(holder.lblMultimediaItem != null) holder.lblMultimediaItem.setVisibility(View.GONE);
+                    if(holder.scrollMultimedia != null) holder.scrollMultimedia.setVisibility(View.GONE);
+                    if(holder.lblColaboradoresItem != null) holder.lblColaboradoresItem.setVisibility(View.GONE);
+                    if(holder.tvColaboradoresBody != null) holder.tvColaboradoresBody.setVisibility(View.GONE);
+                }
 
                 // Configurar lógica de botones y click
                 configurarBotonesYExpansion(holder, finalTarea);
@@ -154,7 +234,7 @@ public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.Ho
                 }
             }
             // Aplicamos los cambios
-            holder.cardTarea.setCardBackgroundColor(android.graphics.Color.WHITE);
+            holder.cardTarea.setCardBackgroundColor(Color.WHITE);
             holder.cardTarea.setLayoutParams(params);
         } else {
             // Ocultamos la vista
@@ -164,6 +244,7 @@ public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.Ho
         }
     }
 
+    // Muestra la línea de separación
     private void lineaSeparadoraAMostrar(HoraViewHolder holder) {
         holder.lineaSeparadora.setVisibility(View.VISIBLE);
     }
@@ -187,12 +268,6 @@ public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.Ho
     @SuppressLint("NotifyDataSetChanged")
     // Configura los botones y lógica de expansión
     private void configurarBotonesYExpansion(HoraViewHolder holder, Tarea tarea) {
-        // Variable para saber si está expandida
-        boolean isExpanded = tarea.isExpanded();
-        // Expansión de la vista
-        holder.layoutDetalles.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
-        holder.imgArrow.setImageResource(isExpanded ? R.drawable.ic_arrow_up : R.drawable.ic_arrow_down);
-
         // Click en tarjeta (Expansión)
         holder.cardTarea.setOnClickListener(v -> {
             tarea.setExpanded(!tarea.isExpanded());
@@ -286,6 +361,35 @@ public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.Ho
         popup.show();
     }
 
+    // Método para obtener el nombre del archivo desde su URI
+    private String getFileName(String uriString) {
+        // Extrae el nombre del archivo de la URI
+        if (uriString == null) return "Archivo";
+        try {
+            // Parsea la URI y obtiene el segmento final como nombre de archivo
+            Uri uri = Uri.parse(uriString);
+            // Obtiene la ruta del archivo
+            String path = uri.getPath();
+            // Extrae el nombre del archivo de la ruta
+            if (path != null && path.contains("/")) {
+                return path.substring(path.lastIndexOf('/') + 1);
+            }
+            // Si no se puede extraer, devuelve el último segmento de la URI
+            return uri.getLastPathSegment() != null ? uri.getLastPathSegment() : "Archivo adjunto";
+        } catch (Exception e) {
+            return "Archivo adjunto";
+        }
+    }
+
+    // Método para abrir el visualizador de multimedia
+    private void abrirVisualizador(Context context, String uri, String tipo) {
+        // Abre la actividad de visualización de multimedia con la URI y tipo especificados
+        Intent intent = new Intent(context, VisualizadorActivity.class);
+        intent.putExtra("URI", uri);
+        intent.putExtra("TIPO", tipo);
+        context.startActivity(intent);
+    }
+
     @Override
     // Devuelve el número de elementos
     public int getItemCount() { return 24; }
@@ -307,13 +411,21 @@ public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.Ho
         LinearLayout layoutDetalles, layoutContenidoPrincipal;
         View lineaSeparadora;
 
+        // Variables nuevas para multimedia y colaboradores
+        TextView lblMultimediaItem, lblColaboradoresItem, tvColaboradoresBody;
+        View scrollMultimedia;
+        CardView cardAdjuntoImagen, cardAdjuntoVideo, cardAdjuntoAudio;
+        TextView tvNombreImagen, tvNombreVideo, tvNombreAudio;
+
         // Constructor de la clase
         public HoraViewHolder(@NonNull View itemView) {
             // Llama al constructor de la clase padre
             super(itemView);
-            // Asignamos las variables de la vista
+            // Asigna las variables de la vista
             tvHora = itemView.findViewById(R.id.tvHoraSlot);
             tvTitulo = itemView.findViewById(R.id.tvTituloTareaSlot);
+
+            // Vista oculta
             tvDesc = itemView.findViewById(R.id.tvDescSlot);
             tvUbi = itemView.findViewById(R.id.tvUbiSlot);
             cardTarea = itemView.findViewById(R.id.cardTareaSlot);
@@ -326,6 +438,20 @@ public class CalendarioAdapter extends RecyclerView.Adapter<CalendarioAdapter.Ho
             btnEditar = itemView.findViewById(R.id.btnEditarSlot);
             btnCompartir = itemView.findViewById(R.id.btnCompartirSlot);
             btnMenu = itemView.findViewById(R.id.btnMenuSlot);
+
+            // Vinculación Multimedia y Colaboradores
+            lblMultimediaItem = itemView.findViewById(R.id.lblMultimediaItem);
+            scrollMultimedia = itemView.findViewById(R.id.scrollMultimedia);
+            cardAdjuntoImagen = itemView.findViewById(R.id.cardAdjuntoImagen);
+            tvNombreImagen = itemView.findViewById(R.id.tvNombreImagen);
+            cardAdjuntoVideo = itemView.findViewById(R.id.cardAdjuntoVideo);
+            tvNombreVideo = itemView.findViewById(R.id.tvNombreVideo);
+            cardAdjuntoAudio = itemView.findViewById(R.id.cardAdjuntoAudio);
+            tvNombreAudio = itemView.findViewById(R.id.tvNombreAudio);
+
+            // Vista de colaboradores
+            lblColaboradoresItem = itemView.findViewById(R.id.lblColaboradoresItem);
+            tvColaboradoresBody = itemView.findViewById(R.id.tvColaboradoresBody);
         }
     }
 }

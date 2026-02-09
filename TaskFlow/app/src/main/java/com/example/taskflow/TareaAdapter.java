@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,11 +14,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
+// Clase adaptador para la lista de tareas
 public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHolder> {
     // Variables de la lista y listener
     private final List<Tarea> listaTareas;
@@ -48,54 +51,144 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
     }
 
     @Override
-    // Método para rellenar cada fila de la lista
+    // Método para crear cada fila de la lista
     public void onBindViewHolder(@NonNull TareaViewHolder holder, int position) {
-        // Recoge la tarea de la lista
+        // Obtiene la tarea actual y configura los datos en la vista
         Tarea tarea = listaTareas.get(position);
         Context context = holder.itemView.getContext();
 
-        // Rellena los campos
+        // Configura los datos de la tarea en la vista
         holder.tvTitulo.setText(tarea.getTitulo());
         holder.tvFecha.setText(tarea.getFechaHora());
         holder.tvDescripcion.setText(tarea.getDescripcion());
         holder.tvUbicacion.setText(tarea.getUbicacion());
 
-        // Comprueba si la tarea está completada, y si lo está, la tacha
+        // Aplica o remueve el tachado según el estado de completada
         if (tarea.isCompletada()) {
             holder.tvTitulo.setPaintFlags(holder.tvTitulo.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         } else {
             holder.tvTitulo.setPaintFlags(holder.tvTitulo.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
 
-        // Expansión de la vista
+        // Maneja la expansión y contracción de los detalles
         boolean isExpanded = tarea.isExpanded();
         holder.layoutDetallesHidden.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
         holder.imgArrowIcon.setImageResource(isExpanded ? R.drawable.ic_arrow_up : R.drawable.ic_arrow_down);
 
-        // Listener para expandir/contraer al tocar la tarjeta
-        View.OnClickListener expandListener = v -> {
-            // Cambia el estado de la tarea
-            tarea.setExpanded(!tarea.isExpanded());
+        // Configura los archivos multimedia y colaboradores
+        if (isExpanded) {
+            boolean tieneMultimedia = false;
 
-            // Actualiza la vista
+            // Imagen
+            if (tarea.getImagenUri() != null && !tarea.getImagenUri().isEmpty()) {
+                // Mostrar tarjeta de imagen
+                holder.cardAdjuntoImagen.setVisibility(View.VISIBLE);
+                holder.tvNombreImagen.setText(getFileName(tarea.getImagenUri()));
+                holder.cardAdjuntoImagen.setOnClickListener(v -> abrirVisualizador(context, tarea.getImagenUri(), "image"));
+                tieneMultimedia = true;
+            } else {
+                holder.cardAdjuntoImagen.setVisibility(View.GONE);
+            }
+
+            // Video
+            if (tarea.getVideoUri() != null && !tarea.getVideoUri().isEmpty()) {
+                // Mostrar tarjeta de video
+                holder.cardAdjuntoVideo.setVisibility(View.VISIBLE);
+                holder.tvNombreVideo.setText(getFileName(tarea.getVideoUri()));
+                holder.cardAdjuntoVideo.setOnClickListener(v -> abrirVisualizador(context, tarea.getVideoUri(), "video"));
+                tieneMultimedia = true;
+            } else {
+                holder.cardAdjuntoVideo.setVisibility(View.GONE);
+            }
+
+            // Audio
+            if (tarea.getAudioUri() != null && !tarea.getAudioUri().isEmpty()) {
+                // Mostrar tarjeta de audio
+                holder.cardAdjuntoAudio.setVisibility(View.VISIBLE);
+                holder.tvNombreAudio.setText(getFileName(tarea.getAudioUri()));
+                holder.cardAdjuntoAudio.setOnClickListener(v -> abrirVisualizador(context, tarea.getAudioUri(), "audio"));
+                tieneMultimedia = true;
+            } else {
+                holder.cardAdjuntoAudio.setVisibility(View.GONE);
+            }
+
+            // Mostrar u ocultar sección multimedia
+            holder.lblMultimediaItem.setVisibility(tieneMultimedia ? View.VISIBLE : View.GONE);
+            holder.scrollMultimedia.setVisibility(tieneMultimedia ? View.VISIBLE : View.GONE);
+
+            // Colaboradores
+            if (tarea.getColaboradores() != null && !tarea.getColaboradores().isEmpty()) {
+                // Mostrar lista de colaboradores
+                holder.lblColaboradoresItem.setVisibility(View.VISIBLE);
+                holder.tvColaboradoresBody.setVisibility(View.VISIBLE);
+                StringBuilder sb = new StringBuilder();
+                // Construye la lista de colaboradores separados por comas
+                for (int i = 0; i < tarea.getColaboradores().size(); i++) {
+                    sb.append(tarea.getColaboradores().get(i));
+                    if (i < tarea.getColaboradores().size() - 1) sb.append(", ");
+                }
+                holder.tvColaboradoresBody.setText(sb.toString());
+            } else {
+                // Ocultar sección de colaboradores si no hay
+                holder.lblColaboradoresItem.setVisibility(View.GONE);
+                holder.tvColaboradoresBody.setVisibility(View.GONE);
+            }
+        } else {
+            // Ocultar multimedia y colaboradores si no está expandido
+            holder.lblMultimediaItem.setVisibility(View.GONE);
+            holder.scrollMultimedia.setVisibility(View.GONE);
+            holder.lblColaboradoresItem.setVisibility(View.GONE);
+            holder.tvColaboradoresBody.setVisibility(View.GONE);
+        }
+
+        // Configura los listeners de los botones y la expansión
+        View.OnClickListener expandListener = v -> {
+            // Alterna el estado de expansión y notifica el cambio
+            tarea.setExpanded(!tarea.isExpanded());
             notifyItemChanged(holder.getBindingAdapterPosition());
         };
 
-        // Eventos de click en la tarjeta
+        // Listener para expandir/contraer detalles
         holder.itemView.setOnClickListener(expandListener);
         holder.cardArrow.setOnClickListener(expandListener);
 
-
-        // Botón de editar
+        // Listeners para los botones de editar, compartir y menú de opciones
         holder.btnEditar.setOnClickListener(v -> {
             if (listener != null) listener.onEditClick(tarea);
         });
 
-        // Botón de compartir
+        // Listener para el botón de compartir
         holder.btnCompartir.setOnClickListener(v -> mostrarDialogoCompartir(context, tarea));
-
-        // Botón de menú de opciones
         holder.btnMenuOpciones.setOnClickListener(v -> mostrarMenuOpciones(context, v, tarea));
+    }
+
+    // Método para obtener el nombre del archivo desde su URI
+    private String getFileName(String uriString) {
+        // Extrae el nombre del archivo de la URI
+        if (uriString == null) return "Archivo";
+        try {
+            // Parsea la URI y obtiene el segmento final como nombre de archivo
+            Uri uri = Uri.parse(uriString);
+            // Obtiene la ruta del archivo
+            String path = uri.getPath();
+            // Extrae el nombre del archivo de la ruta
+            if (path != null && path.contains("/")) {
+                return path.substring(path.lastIndexOf('/') + 1);
+            }
+            // Si no se puede extraer, devuelve el último segmento de la URI
+            return uri.getLastPathSegment() != null ? uri.getLastPathSegment() : "Archivo adjunto";
+        } catch (Exception e) {
+            return "Archivo adjunto";
+        }
+    }
+
+    // Método para abrir el visualizador de multimedia
+    private void abrirVisualizador(Context context, String uri, String tipo) {
+        // Abre la actividad de visualización de multimedia con la URI y tipo especificados
+        Intent intent = new Intent(context, VisualizadorActivity.class);
+        intent.putExtra("URI", uri);
+        intent.putExtra("TIPO", tipo);
+        context.startActivity(intent);
     }
 
     // Método para mostrar el diálogo de compartir interactivo y moderno
@@ -190,26 +283,41 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
         return listaTareas.size();
     }
 
-    // --- VIEWHOLDER ---
+    // Clase ViewHolder para mantener las referencias de las vistas
     public static class TareaViewHolder extends RecyclerView.ViewHolder {
         // Variables de la vista
-        TextView tvTitulo, tvFecha, tvDescripcion, tvUbicacion;
+        TextView tvTitulo, tvFecha, tvDescripcion, tvUbicacion, tvColaboradoresBody;
         LinearLayout layoutDetallesHidden;
-        View cardArrow;
+        View cardArrow, scrollMultimedia;
         ImageView imgArrowIcon, btnEditar, btnCompartir, btnMenuOpciones;
+        View cardAdjuntoImagen, cardAdjuntoVideo, cardAdjuntoAudio;
+        TextView tvNombreImagen, tvNombreVideo, tvNombreAudio;
+        TextView lblColaboradoresItem, lblMultimediaItem;
 
-        // Constructor de la clase
+        // Constructor del ViewHolder
         public TareaViewHolder(@NonNull View itemView) {
             // Llama al constructor de la clase padre
             super(itemView);
-            // Asigna las variables de la vista
+            // Vincula las vistas con sus IDs
             tvTitulo = itemView.findViewById(R.id.tvTareaTitulo);
             tvFecha = itemView.findViewById(R.id.tvTareaFecha);
-
+            
             // Vista oculta
             tvDescripcion = itemView.findViewById(R.id.tvDescripcionBody);
             tvUbicacion = itemView.findViewById(R.id.tvUbicacionBody);
+            tvColaboradoresBody = itemView.findViewById(R.id.tvColaboradoresBody);
+            lblColaboradoresItem = itemView.findViewById(R.id.lblColaboradoresItem);
+            lblMultimediaItem = itemView.findViewById(R.id.lblMultimediaItem);
             layoutDetallesHidden = itemView.findViewById(R.id.layoutDetallesHidden);
+            
+            // Multimedia
+            scrollMultimedia = itemView.findViewById(R.id.scrollMultimedia);
+            cardAdjuntoImagen = itemView.findViewById(R.id.cardAdjuntoImagen);
+            tvNombreImagen = itemView.findViewById(R.id.tvNombreImagen);
+            cardAdjuntoVideo = itemView.findViewById(R.id.cardAdjuntoVideo);
+            tvNombreVideo = itemView.findViewById(R.id.tvNombreVideo);
+            cardAdjuntoAudio = itemView.findViewById(R.id.cardAdjuntoAudio);
+            tvNombreAudio = itemView.findViewById(R.id.tvNombreAudio);
 
             // Botones e iconos
             cardArrow = itemView.findViewById(R.id.cardArrow);

@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/tf_background_mint">
+
+    <!-- Visor de Imagen -->
+    <ImageView
+        android:id="@+id/visorImagen"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        android:contentDescription="@string/lbl_imagen"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+    <!-- Visor de Video -->
+    <VideoView
+        android:id="@+id/visorVideo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Contenedor de Controles de Video -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardVisorVideoControls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginBottom="32dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="20dp">
+
+            <SeekBar
+                android:id="@+id/seekBarVideo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:progressTint="@color/tf_accent_teal"
+                android:thumbTint="@color/tf_accent_teal" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp">
+
+                <TextView
+                    android:id="@+id/tvVideoTiempoActual"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/_00_00"
+                    android:textColor="@color/tf_gray_text"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tvVideoTiempoTotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/_00_00"
+                    android:textColor="@color/tf_gray_text"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnPlayPauseVideo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:contentDescription="@string/desc_reproducir"
+                android:focusable="true"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                app:backgroundTint="@color/tf_accent_teal"
+                app:elevation="4dp"
+                app:fabSize="mini"
+                app:srcCompat="@android:drawable/ic_media_play"
+                app:tint="@color/white"
+                app:useCompatPadding="true"
+                tools:ignore="ClassNameCheck" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Contenedor de Audio Estilizado -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardVisorAudioContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="40dp">
+
+            <!-- Icono Dinámico -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginBottom="28dp"
+                app:cardBackgroundColor="#E0F2F1"
+                app:cardCornerRadius="50dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="28dp"
+                    android:src="@android:drawable/ic_btn_speak_now"
+                    app:tint="@color/tf_accent_teal"
+                    android:importantForAccessibility="no" />
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/tvNombreAudio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:text="@string/nombre_del_audio"
+                android:textColor="@color/tf_text_dark"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textAlignment="center"/>
+
+            <SeekBar
+                android:id="@+id/seekBarAudio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:progressTint="@color/tf_accent_teal"
+                android:thumbTint="@color/tf_accent_teal" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp">
+
+                <TextView
+                    android:id="@+id/tvTiempoActual"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/_00_00"
+                    android:textColor="@color/tf_gray_text"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tvTiempoTotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/_00_00"
+                    android:textColor="@color/tf_gray_text"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnPlayPauseAudio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:contentDescription="@string/desc_reproducir"
+                android:focusable="true"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                app:backgroundTint="@color/tf_accent_teal"
+                app:elevation="4dp"
+                app:fabSize="normal"
+                app:srcCompat="@android:drawable/ic_media_play"
+                app:tint="@color/white"
+                app:useCompatPadding="true"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Botón Cerrar Flotante -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/btnCerrarVisorCard"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="24dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="8dp"
+        app:strokeWidth="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btnCerrarVisor"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="@string/desc_cerrar_visor"
+            android:focusable="true"
+            android:padding="12dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            app:tint="@color/tf_text_dark" />
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

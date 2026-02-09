@@ -54,7 +54,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="1.0"
-                app:tint="#00897B" />
+                app:tint="#004D40" />
 
             <EditText
                 android:id="@+id/etNombre"
@@ -69,7 +69,7 @@
                 android:minHeight="48dp"
                 android:paddingHorizontal="12dp"
                 android:textColor="@color/black"
-                android:textColorHint="#757575"
+                android:textColorHint="#424242"
                 app:layout_constraintEnd_toStartOf="@id/btnGuardar"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/lblNombre"
@@ -92,6 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:baselineAligned="false"
                 android:layout_marginTop="8dp"
                 app:layout_constraintTop_toBottomOf="@id/lblFecha">
 
@@ -144,6 +145,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:baselineAligned="false"
                 android:layout_marginTop="8dp"
                 app:layout_constraintTop_toBottomOf="@id/rowFechaInicio">
 
@@ -238,6 +240,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:autofillHints="postalAddress"
+                android:hint="@string/barco_de_chanquete"
                 android:background="@drawable/bg_input_white"
                 android:inputType="textPostalAddress"
                 android:minHeight="48dp"
@@ -247,7 +250,237 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/lblUbicacion"
                 tools:ignore="LabelFor,TextContrastCheck,VisualLintTextFieldSize,SpeakableTextPresentCheck" />
-                
+
+            <!-- Sección Multimedia (Imagenes, Videos, Audio) -->
+            <TextView
+                android:id="@+id/lblMultimedia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lbl_multimedia"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:layout_marginTop="20dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/etUbicacion"/>
+
+            <LinearLayout
+                android:id="@+id/layoutMultiOptions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@id/lblMultimedia">
+
+                <LinearLayout
+                    android:id="@+id/btnSelectImagen"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:background="@drawable/bg_input_white"
+                    android:layout_marginEnd="4dp"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_gallery"
+                        android:contentDescription="@string/lbl_imagen"
+                        app:tint="#004D40"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/lbl_imagen"
+                        android:textSize="12sp"
+                        android:textColor="#004D40"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnSelectVideo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:background="@drawable/bg_input_white"
+                    android:layout_marginHorizontal="2dp"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_slideshow"
+                        android:contentDescription="@string/lbl_video"
+                        app:tint="#004D40"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/lbl_video"
+                        android:textSize="12sp"
+                        android:textColor="#004D40"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnSelectAudio"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:background="@drawable/bg_input_white"
+                    android:layout_marginStart="4dp"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_btn_speak_now"
+                        android:contentDescription="@string/lbl_audio"
+                        app:tint="#004D40"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/lbl_audio"
+                        android:textSize="12sp"
+                        android:textColor="#004D40"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/containerPreviews"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@id/layoutMultiOptions">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/previewImagenLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:visibility="gone">
+                    <ImageView
+                        android:id="@+id/imgPreview"
+                        android:layout_width="0dp"
+                        android:layout_height="150dp"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/bg_input_white"
+                        android:contentDescription="@string/desc_adjuntar_imagen"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+                    <ImageView
+                        android:id="@+id/btnRemoveImagen"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_margin="4dp"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        android:background="@drawable/bg_rounded_mint"
+                        android:contentDescription="@string/desc_quitar_imagen"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="#B71C1C"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/previewVideoLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:background="#F5F5F5"
+                    android:visibility="gone">
+                    <ImageView
+                        android:id="@+id/videoPreviewIcon"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:scaleType="center"
+                        android:src="@android:drawable/ic_media_play"
+                        android:contentDescription="@string/lbl_video"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
+                    <TextView
+                        android:id="@+id/tvVideoName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:text="@string/lbl_video"
+                        android:textColor="@color/black"
+                        android:textStyle="italic"
+                        app:layout_constraintTop_toBottomOf="@id/videoPreviewIcon"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+                    <ImageView
+                        android:id="@+id/btnRemoveVideo"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_margin="4dp"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        android:background="@drawable/bg_rounded_mint"
+                        android:contentDescription="@string/desc_quitar_video"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="#B71C1C"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/previewAudioLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:background="@drawable/bg_input_white"
+                    android:visibility="gone">
+                    <ImageView
+                        android:id="@+id/audioIcon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_btn_speak_now"
+                        app:tint="#004D40"
+                        android:contentDescription="@string/lbl_audio"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+                    <TextView
+                        android:id="@+id/tvAudioName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:text="@string/lbl_audio"
+                        android:textColor="@color/black"
+                        app:layout_constraintStart_toEndOf="@id/audioIcon"
+                        app:layout_constraintEnd_toStartOf="@id/btnRemoveAudio"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constrainedWidth="true"/>
+                    <ImageView
+                        android:id="@+id/btnRemoveAudio"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        android:contentDescription="@string/desc_quitar_audio"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:tint="#B71C1C"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/lblNotif"
                 android:layout_width="wrap_content"
@@ -258,7 +491,7 @@
                 android:textSize="16sp"
                 android:layout_marginTop="20dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/etUbicacion"/>
+                app:layout_constraintTop_toBottomOf="@id/containerPreviews"/>
 
             <LinearLayout
                 android:id="@+id/containerNotificaciones"
@@ -277,8 +510,7 @@
                 android:layout_height="48dp"
                 android:padding="8dp"
                 android:src="@drawable/ic_add_circle_filled"
-                app:tint="#00897B"
-                android:layout_marginTop="8dp"
+                app:tint="#004D40"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -295,7 +527,7 @@
                 android:textStyle="bold"
                 android:textColor="@color/black"
                 android:textSize="16sp"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="20dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnAddNotif"/>
 
@@ -316,15 +548,14 @@
                 android:layout_height="48dp"
                 android:padding="8dp"
                 android:src="@drawable/ic_add_circle_filled"
-                app:tint="#00897B"
-                android:layout_marginTop="8dp"
+                app:tint="#004D40"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/desc_anadir_colaborador"
                 app:layout_constraintTop_toBottomOf="@id/containerColaboradores"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/> 
+                app:layout_constraintEnd_toEndOf="parent"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>

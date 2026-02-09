@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+// Clase que implementa la actividad del calendario
 public class CalendarioActivity extends AppCompatActivity {
 
     // Variables
@@ -28,7 +29,7 @@ public class CalendarioActivity extends AppCompatActivity {
     private CalendarioAdapter adapter;
     private List<Tarea> listaTareasVisual;
     private Calendar fechaSeleccionadaCalendar;
-    private TextView tvMesAnioSelector, tvFechaSeleccionadaBig;
+        private TextView tvMesAnioSelector, tvFechaSeleccionadaBig;
     private CalendarioAdapter.OnItemClickListener listenerAcciones;
 
     // Métodos de ciclo de vida
@@ -187,7 +188,6 @@ public class CalendarioActivity extends AppCompatActivity {
         tvFechaSeleccionadaBig.setText(sdf2.format(fechaSeleccionadaCalendar.getTime()).toUpperCase());
     }
 
-    // --- BARRA DE HERRAMIENTAS ---
     // Configura los botones de la barra de herramientas
     private void setupToolbarButtons() {
         findViewById(R.id.btnBuscar).setOnClickListener(v -> mostrarDialogoBusqueda());
